@@ -3,49 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import { useState, useEffect, useRef } from "react";
-import { Menu, X, Plane, Shield, Clock, Globe, ArrowRight, Instagram, Twitter, Linkedin } from "lucide-react";
-import { motion, AnimatePresence, useScroll, useSpring, useTransform } from "motion/react";
+import { Menu, X, Shield, Clock, Globe, ArrowRight, Instagram, Twitter, Linkedin } from "lucide-react";
+import { motion, AnimatePresence, useScroll, useSpring } from "motion/react";
 
 export default function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const { scrollY } = useScroll();
-  
-  // Track last scroll position to detect scrolling
-  const lastScrollY = useRef(0);
-  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!videoRef.current) return;
-      
-      // Play when movement is detected
-      if (videoRef.current.paused) {
-        videoRef.current.play().catch(() => {});
-      }
-
-      // Clear previous timeout and set a new one to pause when scrolling stops
-      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-      
-      scrollTimeout.current = setTimeout(() => {
-        if (videoRef.current && !videoRef.current.paused) {
-          videoRef.current.pause();
-        }
-      }, 150); // Pause 150ms after scroll stops
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-    };
-  }, []);
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
 
   const navLinks = [
     { name: "Start", href: "#start" },
@@ -84,10 +53,16 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen bg-white text-gray-900 scroll-smooth">
+      {/* Scroll Progress Bar */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-1 bg-gray-900 z-50 origin-left"
+        style={{ scaleX }}
+      />
+
       {/* Global Fixed Background Video */}
       <div className="fixed inset-0 z-0 h-screen w-full pointer-events-none">
         <video
-          ref={videoRef}
+          autoPlay
           muted
           loop
           playsInline
@@ -111,19 +86,26 @@ export default function App() {
             {/* Navigation Bar */}
             <nav className="mx-auto w-full max-w-7xl px-8 py-6">
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-semibold tracking-tight text-gray-900">
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="text-2xl font-semibold tracking-tight text-gray-900"
+              >
                 SkyElite
-              </div>
+              </motion.div>
 
               <div className="hidden items-center gap-8 md:flex">
-                {navLinks.map((link) => (
-                  <a
+                {navLinks.map((link, i) => (
+                  <motion.a
                     key={link.name}
                     href={link.href}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
                     className="text-xs font-medium tracking-wide text-gray-900 transition-colors uppercase hover:text-gray-500"
                   >
                     {link.name}
-                  </a>
+                  </motion.a>
                 ))}
               </div>
 
@@ -169,27 +151,52 @@ export default function App() {
           {/* Main Hero Content */}
           <main className="-mt-32 flex flex-1 items-center justify-center px-8 sm:-mt-40 md:-mt-60 lg:-mt-80">
             <div className="text-center">
-              <p className="mb-4 text-xs font-semibold tracking-[0.2em] text-gray-600 uppercase">
+              <motion.p 
+                initial={{ opacity: 0, letterSpacing: "0.5em" }}
+                animate={{ opacity: 1, letterSpacing: "0.2em" }}
+                transition={{ duration: 0.8 }}
+                className="mb-4 text-xs font-semibold text-gray-600 uppercase"
+              >
                 Private Jets
-              </p>
+              </motion.p>
 
               <div className="relative mb-8 flex flex-col items-center">
-                <h1 className="text-7xl font-normal leading-none tracking-tighter text-gray-400 sm:text-8xl md:text-9xl">
+                <motion.h1 
+                  initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
+                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  viewport={{ once: false }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                  className="text-7xl font-normal leading-none tracking-tighter text-gray-400 sm:text-8xl md:text-9xl"
+                >
                   Premium.
-                </h1>
-                <h1 
+                </motion.h1>
+                <motion.h1 
+                  initial={{ opacity: 0, y: 60, filter: "blur(10px)" }}
+                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  viewport={{ once: false }}
+                  transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
                   className="relative -mt-4 text-7xl font-normal leading-none tracking-tighter sm:-mt-6 sm:text-8xl md:-mt-8 md:text-9xl"
                   style={{ color: "#202A36" }}
                 >
                   Accessible.
-                </h1>
+                </motion.h1>
               </div>
 
-              <p className="mx-auto mb-10 max-w-2xl text-lg text-gray-500 md:text-xl">
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1, delay: 0.6 }}
+                className="mx-auto mb-10 max-w-2xl text-lg text-gray-500 md:text-xl"
+              >
                 Your dedication deserves recognition. Experience the pinnacle of aviation tailored to your lifestyle.
-              </p>
+              </motion.p>
 
-              <div className="flex flex-wrap items-center justify-center gap-6">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.8 }}
+                className="flex flex-wrap items-center justify-center gap-6"
+              >
                 <button className="rounded-full bg-gray-100 px-10 py-4 text-sm font-medium text-gray-800 transition-all hover:bg-gray-200">
                   Discover
                 </button>
@@ -201,7 +208,7 @@ export default function App() {
                 >
                   Book Now
                 </button>
-              </div>
+              </motion.div>
             </div>
           </main>
         </div>
@@ -214,10 +221,10 @@ export default function App() {
             {benefits.map((benefit, idx) => (
               <motion.div 
                 key={idx}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
+                viewport={{ once: false, amount: 0.3 }}
+                transition={{ duration: 0.6, delay: idx * 0.1 }}
                 className="group p-8 rounded-3xl bg-white/40 shadow-sm backdrop-blur-md transition-all hover:bg-white/60 border border-white/30"
               >
                 <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-gray-900 shadow-sm transition-transform group-hover:scale-110">
@@ -232,25 +239,31 @@ export default function App() {
       </section>
 
       {/* Fleet Section (Body) */}
-      <section id="story" className="py-24 bg-transparent">
+      <section id="story" className="py-24 bg-transparent text-white md:text-gray-900">
         <div className="mx-auto max-w-7xl px-8">
-          <div className="mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false }}
+            className="mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end"
+          >
             <div>
               <p className="mb-4 text-xs font-semibold tracking-widest text-gray-600 uppercase">Our Fleet</p>
               <h2 className="text-4xl font-normal tracking-tight md:text-5xl">The pinnacle of engineering.</h2>
             </div>
-            <button className="group flex items-center gap-2 text-sm font-medium text-gray-900">
+            <button className="group flex items-center gap-2 text-sm font-medium text-gray-900 md:text-gray-900">
               View all aircraft <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </button>
-          </div>
+          </motion.div>
 
           <div className="grid gap-8 md:grid-cols-3">
             {fleet.map((item, idx) => (
               <motion.div 
                 key={idx}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, amount: 0.2 }}
+                transition={{ delay: idx * 0.1 }}
                 className="group relative overflow-hidden rounded-[2.5rem] bg-white/60 backdrop-blur-md transition-all hover:shadow-2xl border border-white/40"
               >
                 <div className="aspect-[4/5] overflow-hidden">
@@ -277,22 +290,30 @@ export default function App() {
       {/* CTA Banner */}
       <section className="py-24 bg-transparent">
         <div className="mx-auto max-w-7xl px-8">
-          <div 
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: false }}
+            transition={{ duration: 0.8 }}
             className="rounded-[3rem] p-12 md:p-24 text-center text-white relative overflow-hidden shadow-2xl"
             style={{ backgroundColor: "#202A36" }}
           >
             <div className="relative z-10 mx-auto max-w-3xl">
-              <h2 className="mb-8 text-4xl font-normal leading-tight md:text-6xl tracking-tight">
+              <motion.h2 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="mb-8 text-4xl font-normal leading-tight md:text-6xl tracking-tight"
+              >
                 Your journey starts with a single click.
-              </h2>
+              </motion.h2>
               <button className="rounded-full bg-white px-12 py-5 text-sm font-semibold text-gray-900 transition-transform hover:scale-105">
                 Request a Quote
               </button>
             </div>
-            {/* Abstract design elements */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -mr-48 -mt-48 blur-3xl" />
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full -ml-48 -mb-48 blur-3xl" />
-          </div>
+          </motion.div>
         </div>
       </section>
 
