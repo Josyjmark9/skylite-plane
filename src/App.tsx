@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Menu, X, Shield, Clock, Globe, ArrowRight, Instagram, Twitter, Linkedin } from "lucide-react";
-import { motion, AnimatePresence, useScroll, useSpring } from "motion/react";
+import { motion, AnimatePresence, useScroll, useSpring, useTransform } from "motion/react";
 
 export default function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -50,6 +50,28 @@ export default function App() {
     { icon: <Shield className="w-6 h-6" />, title: "Absolute Privacy", description: "Your journey remains strictly confidential and secure." },
     { icon: <Globe className="w-6 h-6" />, title: "Global Access", description: "Land closer to your final destination in 5,000+ airports." },
   ];
+
+  const benefitsRef = useRef(null);
+  const fleetRef = useRef(null);
+  const ctaRef = useRef(null);
+
+  const { scrollYProgress: benefitsProgress } = useScroll({
+    target: benefitsRef,
+    offset: ["start end", "center center", "end start"]
+  });
+  const benefitsOpacity = useTransform(benefitsProgress, [0, 0.4, 0.6, 1], [0, 1, 1, 0]);
+
+  const { scrollYProgress: fleetProgress } = useScroll({
+    target: fleetRef,
+    offset: ["start end", "center center", "end start"]
+  });
+  const fleetOpacity = useTransform(fleetProgress, [0, 0.4, 0.6, 1], [0, 1, 1, 0]);
+
+  const { scrollYProgress: ctaProgress } = useScroll({
+    target: ctaRef,
+    offset: ["start end", "center center", "end start"]
+  });
+  const ctaOpacity = useTransform(ctaProgress, [0, 0.4, 0.6, 1], [0, 1, 1, 0]);
 
   return (
     <div className="relative min-h-screen bg-white text-gray-900 scroll-smooth">
@@ -215,7 +237,12 @@ export default function App() {
       </section>
 
       {/* Benefits Content (Body) */}
-      <section id="benefits" className="py-24 bg-white/40 backdrop-blur-sm border-y border-white/20">
+      <motion.section 
+        id="benefits" 
+        ref={benefitsRef}
+        style={{ opacity: benefitsOpacity }}
+        className="py-24 bg-white/40 backdrop-blur-sm border-y border-white/20"
+      >
         <div className="mx-auto max-w-7xl px-8">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
             {benefits.map((benefit, idx) => (
@@ -236,10 +263,15 @@ export default function App() {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Fleet Section (Body) */}
-      <section id="story" className="py-24 bg-transparent text-white md:text-gray-900">
+      <motion.section 
+        id="story" 
+        ref={fleetRef}
+        style={{ opacity: fleetOpacity }}
+        className="py-24 bg-transparent text-white md:text-gray-900"
+      >
         <div className="mx-auto max-w-7xl px-8">
           <motion.div 
             initial={{ opacity: 0, y: 40 }}
@@ -285,10 +317,14 @@ export default function App() {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* CTA Banner */}
-      <section className="py-24 bg-transparent">
+      <motion.section 
+        ref={ctaRef}
+        style={{ opacity: ctaOpacity }}
+        className="py-24 bg-transparent"
+      >
         <div className="mx-auto max-w-7xl px-8">
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
@@ -315,7 +351,7 @@ export default function App() {
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full -ml-48 -mb-48 blur-3xl" />
           </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Footer */}
       <footer className="bg-white/60 backdrop-blur-xl pt-24 pb-12 border-t border-white/20">
